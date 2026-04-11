@@ -23,6 +23,7 @@ class Metabox
     {
         add_action('add_meta_boxes_twsp_subscriber', [$this, 'addMetaBoxes']);
         add_action('save_post', [$this, 'save_subscriber_meta'], 10, 2);
+        //   add_action('admin_head-edit.php', [$this, 'edit_post_change_title']);
     }
 
     public function addMetaBoxes($post)
@@ -177,10 +178,21 @@ class Metabox
             }
         }
 
+    }
 
+    public function edit_post_change_title()
+    {
+        global $post;
+        if ($post->post_type == 'twsp_subscriber') {
+            add_filter('the_title', [$this, 'subscriber_title'], 100, 2);
+        }
 
+    }
 
-
+    public function subscriber_title($title, $post_id)
+    {
+        $new_title = get_post_meta($post_id, 'slb_first_name', true) . ' ' . get_post_meta($post_id, 'slb_last_name', true);
+        return $new_title;
     }
 
 }
