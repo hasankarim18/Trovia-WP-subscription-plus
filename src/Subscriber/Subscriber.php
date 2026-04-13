@@ -19,12 +19,17 @@ class Subscriber
 
         add_action('init', [$this, 'init']);
 
+
+
         $service = new SubscriberService();
 
         $features = [
             new ShortCode($service),
-            new Metabox($service),
-            new ModifyColumnForMetabox()
+            //  new Metabox($service),
+            //  new ModifyColumnForMetabox(),
+            new ModifyColumnForAcf(),
+            new ModifyColumnsForLists(),
+            new AdminPage()
         ];
 
         foreach ($features as $feature) {
@@ -39,8 +44,29 @@ class Subscriber
 
     public function init()
     {
+        add_action('wp_enqueue_scripts', [$this, 'enqueue_scripts']);
+        add_action('admin_enqueue_scripts', [$this, 'admin_enqueue_scripts']);
+
+    }
 
 
+    public function enqueue_scripts()
+    {
+        wp_enqueue_script('jquery'); // VERY IMPORTANT
+        wp_enqueue_script('subscriber-form-handler', TWSP_PLUGIN_URI . 'src/js/subscriber-form-handler.js', ['jquery'], '1.0.0', true);
+        wp_localize_script('subscriber-form-handler', 'twsp', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('twsp_subscriber_form_nonce'),
+            'action' => 'save_twsp_subscriber_form',
+            'admin_url' => admin_url()
+
+        ]);
+    }
+
+    public function admin_enqueue_scripts()
+    {
+        // snappy-list-builder-admin.js
+        wp_enqueue_script('snappy-list-builder-admin', TWSP_PLUGIN_URI . '/src/js/snappy-list-builder-admin.js', ['jquery'], true);
     }
 
 }

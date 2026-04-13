@@ -19,21 +19,36 @@ class ModifyColumnForMetabox
     {
 
         add_filter('manage_twsp_subscriber_posts_columns', [$this, 'subscriber_column_headers']);
-        add_action('manage_twsp_subscriber_posts_custom_column', [$this, 'twsp_subscriber_column_data'], 100, 2);
+        add_action('manage_twsp_subscriber_posts_custom_column', [$this, 'twsp_subscriber_column_data'], 10, 2);
+        add_filter('the_title', [$this, 'subscriber_title_modify'], 10, 2);
     }
 
     public function subscriber_column_headers($columns)
     {
 
-
-
         $columns = array(
             'cb' => '<input type="checkbox" />',
-            'subscriber_name' => "Subscriber name",
+            'title' => "Subscriber name",
             'email' => "Email",
+            'Subscriber_id' => 'Subscriber Id'
         );
 
         return $columns;
+    }
+
+    public function subscriber_title_modify($title, $post_id)
+    {
+        $screen = get_current_screen();
+        //  echo $screen->post_type;
+
+        if ($screen && $screen->post_type === 'twsp_subscriber') {
+            if (get_post_type($post_id) === 'twsp_subscriber') {
+                $new_title = get_post_meta($post_id, 'slb_first_name', true) . ' ' . get_post_meta($post_id, 'slb_last_name', true);
+                $title = $new_title;
+            }
+        }
+
+        return $title;
     }
 
     // Adding data to the columns / twsp_subscriber 
@@ -52,6 +67,9 @@ class ModifyColumnForMetabox
                 break;
             case 'email':
                 $output = get_post_meta($post_id, 'slb_email', true);
+                break;
+            case 'Subscriber_id':
+                $output = $post_id;
                 break;
             default:
                 break;
